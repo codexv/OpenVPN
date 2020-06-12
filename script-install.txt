@@ -1,0 +1,28 @@
+1. Login to Server.
+2. Copy/transfer server-install.sh, and add-client.sh to home directory.
+3. Check latest version of EasyRSA at https://github.com/OpenVPN/easy-rsa/releases
+   and edit the parameters found in server-install.sh
+
+cd ~
+nano server-install.sh
+
+5. Run the following commands:
+
+chmod +x server-install.sh
+chmod +x add-client.sh
+
+./server-install.sh [common-name-of-server] [ca-username] [ip.address.of.CA] [port] [protocol]
+
+	//example: ./server-install.sh server admin 10.10.10.10 1194 udp
+
+
+5. Login to CA Machine.
+6. Copy/transfer ca-install.sh, sign-req.sh, and vars to home directory.
+7. Run the following conmmands:
+
+chmod +x ca-install.sh
+chmod +x sign-req.sh
+
+./ca-install.sh [common-name-of-server]
+
+8. Continue script on Server Machine.
