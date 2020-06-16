@@ -55,6 +55,8 @@ sh -c 'echo "set_var EASYRSA_REQ_OU         \"'$OU'\"" >> ~/'$RSAFOLDER'/vars'
 ./easyrsa import-req /tmp/$CNSERVER.req $CNSERVER
 ./easyrsa sign-req server $CNSERVER
 
+cp /tmp/sign-cert.sh ~/sign-cert.sh
+
 echo ""
 echo "You may now proceed with the server-install.sh script."
 echo "Press [ENTER] on your Server Machine"

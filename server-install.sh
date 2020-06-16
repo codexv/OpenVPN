@@ -8,11 +8,12 @@
 # Make sure that your Server has access to the CA Machine;
 # You may need to configure the ssh-keys in order to work correctly;
 
-CNSERVER="vpn-usa2"         # Common Name of Server (Ex. server)
-CAUSER="acronix"            # Non-root user of the CA Machine
-CAIPADD="10.10.10.10"       # IP Address of CA Machine
-PORTN="1194"                # Port Number used by the VPN
-PROTO="udp"                 # Choose either "tcp" or "udp"
+#### The section below has been deprecated and replaced with user prompts ####
+#CNSERVER="vpn-usa2"         # Common Name of Server (Ex. server)
+#SERVERIP="10.10.10.11"      # IP Address of your VPN Server
+#CAUSER="acronix"            # Non-root user of the CA Machine
+#PORTN="1194"                # Port Number used by the VPN
+#PROTO="udp"                 # Choose either "tcp" or "udp"
 
 # Latest version of EasyRSA (.tgz)
 RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0.7.tgz"
@@ -25,17 +26,42 @@ RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0
 
 # WARNING: PLEASE DO NOT EDIT ANYTHING BELOW UNLESS YOU KNOW WHAT YOU'RE DOING!
 
+
 #STEP1: Installing OpenVPN, EasyRSA, UFW, and dnsutils
 sudo apt update
 sudo apt install openvpn ufw dnsutils
 
-SERVERIP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+read -p "Common Name of VPN Server [vpn-usa2]: " CNSERVER
+: ${CNSERVER:=vpn-usa2}
+
+read -p "IP Address of VPN Server [10.10.10.11]: " SERVERIP
+: ${SERVERIP:=10.10.10.11}
+
+read -p "Port Number [1194]: " PORTN
+: ${PORTN:=1194}
+
+read -p "Protocol (tcp/udp) [udp]: " PROTO
+: ${PROTO:=udp}
+
+read -p "Non-root user of CA Machine [acronix]: " CAUSER
+: ${CAUSER:=acronix}
+
+read -p "IP Address of CA Machine [10.10.10.12]: " CAIPADD
+: ${CAIPADD:=10.10.10.12}
+
 RSAFILE=$(echo $RSAURL | awk -F/ '{ print $NF }')
 RSAFOLDER=${RSAFILE//.tgz/}
 
 wget -P ~/ $RSAURL
 cd ~
 tar xvf $RSAFILE
+
+#### Create ~/sign-cert.sh File (to be used by CA Machine) ####
+sh -c 'echo "#!/bin/bash" > ~/sign-cert.sh'
+sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/sign-cert.sh'
+sh -c 'echo "./easyrsa import-req /tmp/\$1.req \$1" >> ~/sign-cert.sh'
+sh -c 'echo "./easyrsa sign-req client \$1" >> ~/sign-cert.sh'
+sh -c 'echo "echo \"You may now press ENTER on the other machine.\"" >> ~/sign-cert.sh'
 
 #STEP2: EasyRSA Variables & Building the CA
 #This is done inside the CA Machine
@@ -46,18 +72,18 @@ cd ~/$RSAFOLDER/
 ./easyrsa gen-req $CNSERVER nopass
 sudo cp ~/$RSAFOLDER/pki/private/$CNSERVER.key /etc/openvpn/
 echo ""
-echo "You are now going to SCP (upload) a file to your CA Machine."
-echo "You may be prompted to enter password for $CAUSER@$CAIPADD"
+echo "You are now going to SCP (upload) files to your CA Machine."
+echo "You may be prompted to enter password for $CAUSER@$CAIPADD twice"
 read -p "Press [ENTER] to Continue..."
-scp ~/$RSAFOLDER/pki/reqs/$CNSERVER.req $CAUSER@$CAIPADD:/tmp
+scp ~/$RSAFOLDER/pki/reqs/$CNSERVER.req ~/sign-cert.sh $CAUSER@$CAIPADD:/tmp
+scp ~/OpenVPN/ca-install.sh $CAUSER@$CAIPADD:/home/$CAUSER/
 echo ""
 read -p "Proceed with CA-Machine Script, then press ENTER here when instructed..."
 echo ""
-echo "You are now going to SCP (download) a file from your CA Machine."
+echo "You are now going to SCP (download) files from your CA Machine."
 echo "You may be prompted to enter password for $CAUSER@$CAIPADD"
 read -p "Press [ENTER] to Continue..."
-scp $CAUSER@$CAIPADD:/home/$CAUSER/$RSAFOLDER/pki/issued/$CNSERVER.crt /tmp
-scp $CAUSER@$CAIPADD:/home/$CAUSER/$RSAFOLDER/pki/ca.crt /tmp
+scp $CAUSER@$CAIPADD:/home/$CAUSER/$RSAFOLDER/pki/issued/$CNSERVER.crt $CAUSER@$CAIPADD:/home/$CAUSER/$RSAFOLDER/pki/ca.crt /tmp
 sudo cp /tmp/$CNSERVER.crt /etc/openvpn/
 sudo cp /tmp/ca.crt /etc/openvpn/
 cd ~/$RSAFOLDER/
@@ -142,6 +168,7 @@ sh -c 'echo "cipher AES-256-CBC" >> ~/client-configs/base.conf'
 sh -c 'echo "auth SHA256" >> ~/client-configs/base.conf'
 sh -c 'echo "verb 3" >> ~/client-configs/base.conf'
 
+#### Create make_config.sh File ####
 sh -c 'echo "#!/bin/bash" > ~/client-configs/make_config.sh'
 sh -c 'echo "" >> ~/client-configs/make_config.sh'
 sh -c 'echo "# First argument: Client identifier" >> ~/client-configs/make_config.sh'
@@ -163,4 +190,26 @@ sh -c 'echo "    <(echo -e '\''</tls-auth>'\'') \\" >> ~/client-configs/make_con
 sh -c 'echo "    > \${OUTPUT_DIR}/\${1}.ovpn" >> ~/client-configs/make_config.sh'
 
 chmod 700 ~/client-configs/make_config.sh
+echo "You may now add client configuration files. Example: ./add-client.sh client1"
+echo "add-client.sh can be found at your home directory."
+
+#### Create ~/add-client.sh File ####
+sh -c 'echo "#!/bin/bash" > ~/add-client.sh'
+sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/add-client.sh'
+sh -c 'echo "./easyrsa gen-req \$1 nopass" >> ~/add-client.sh'
+sh -c 'echo "cp pki/private/\$1.key ~/client-configs/keys/" >> ~/add-client.sh'
+sh -c 'echo "scp pki/reqs/\$1.req "'$CAUSER'"@"'$CAIPADD'":/tmp" >> ~/add-client.sh'
+sh -c 'echo "echo \"Switch to CA machine and run ./sign-cert.sh \$1\"" >> ~/add-client.sh'
+sh -c 'echo "read -p \"Press [ENTER] here when instructed...\"" >> ~/add-client.sh'
+sh -c 'echo "scp "'$CAUSER'"@"'$CAIPADD'":/home/"'$CAUSER'"/"'$RSAFOLDER'"/pki/issued/\$1.crt /tmp" >> ~/add-client.sh'
+sh -c 'echo "cp /tmp/\$1.crt ~/client-configs/keys/" >> ~/add-client.sh'
+sh -c 'echo "cd ~/client-configs" >> ~/add-client.sh'
+sh -c 'echo "sudo ./make_config.sh \$1" >> ~/add-client.sh'
+sh -c 'echo "echo \"\"" >> ~/add-client.sh'
+sh -c 'echo "ls files" >> ~/add-client.sh'
+sh -c 'echo "echo \"\"" >> ~/add-client.sh'
+sh -c 'echo "echo \"You may now transfer /home/"'$(whoami)'"/client-configs/files/\$1.ovpn to your client device.\"" >> ~/add-client.sh'
+
+chmod 700 ~/add-client.sh
+
 
