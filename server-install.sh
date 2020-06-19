@@ -8,16 +8,15 @@
 # Make sure that your Server has access to the CA Machine;
 # You may need to configure the ssh-keys in order to work correctly;
 
+# Latest version of EasyRSA (.tgz)
+RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0.7.tgz"
+
 #### The section below has been deprecated and replaced with user prompts ####
 #CNSERVER="vpn-usa2"         # Common Name of Server (Ex. server)
 #SERVERIP="10.10.10.11"      # IP Address of your VPN Server
 #CAUSER="acronix"            # Non-root user of the CA Machine
 #PORTN="1194"                # Port Number used by the VPN
 #PROTO="udp"                 # Choose either "tcp" or "udp"
-
-# Latest version of EasyRSA (.tgz)
-RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0.7.tgz"
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # #  END OF CONFIGURATION  # # # # # # # # # # # # 
@@ -29,7 +28,9 @@ RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0
 
 #STEP1: Installing OpenVPN, EasyRSA, UFW, and dnsutils
 sudo apt update
-sudo apt install openvpn ufw dnsutils
+sudo apt install openvpn ufw dnsutils -yy
+
+echo ""
 
 read -p "Common Name of VPN Server [vpn-usa2]: " CNSERVER
 : ${CNSERVER:=vpn-usa2}
@@ -62,6 +63,7 @@ sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/sign-cert.sh'
 sh -c 'echo "./easyrsa import-req /tmp/\$1.req \$1" >> ~/sign-cert.sh'
 sh -c 'echo "./easyrsa sign-req client \$1" >> ~/sign-cert.sh'
 sh -c 'echo "echo \"You may now press ENTER on the other machine.\"" >> ~/sign-cert.sh'
+chmod 700 ~/sign-cert.sh
 
 #STEP2: EasyRSA Variables & Building the CA
 #This is done inside the CA Machine
@@ -116,7 +118,7 @@ sudo sh -c 'echo "push \"redirect-gateway def1 bypass-dhcp\"" >> /etc/openvpn/se
 sudo sh -c 'echo "push \"dhcp-option DNS 208.67.222.222\"" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "push \"dhcp-option DNS 208.67.220.220\"" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "keepalive 10 120" >> /etc/openvpn/server.conf'
-sudo sh -c 'echo "tls-auth ta.key 0 # This file is secret" >> /etc/openvpn/server.conf'
+sudo sh -c 'echo "tls-crypt ta.key # This file is secret" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "cipher AES-256-CBC" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "auth SHA256" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "user nobody" >> /etc/openvpn/server.conf'
@@ -124,7 +126,9 @@ sudo sh -c 'echo "group nogroup" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "persist-key" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "persist-tun" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "status /var/log/openvpn/openvpn-status.log" >> /etc/openvpn/server.conf'
-sudo sh -c 'echo "verb 3" >> /etc/openvpn/server.conf'
+sudo sh -c 'echo "verb 0" >> /etc/openvpn/server.conf'
+sudo sh -c 'echo "log /dev/null" >> /etc/openvpn/server.conf'
+sudo sh -c 'echo "status /dev/null" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "explicit-exit-notify 0" >> /etc/openvpn/server.conf'
 
 #STEP6: Adjusting Server Network Configuration
@@ -188,7 +192,6 @@ sh -c 'echo "    <(echo -e '\''</key>\\n<tls-auth>'\'') \\" >> ~/client-configs/
 sh -c 'echo "    \${KEY_DIR}/ta.key \\" >> ~/client-configs/make_config.sh'
 sh -c 'echo "    <(echo -e '\''</tls-auth>'\'') \\" >> ~/client-configs/make_config.sh'
 sh -c 'echo "    > \${OUTPUT_DIR}/\${1}.ovpn" >> ~/client-configs/make_config.sh'
-
 chmod 700 ~/client-configs/make_config.sh
 echo "You may now add client configuration files. Example: ./add-client.sh client1"
 echo "add-client.sh can be found at your home directory."
@@ -209,7 +212,6 @@ sh -c 'echo "echo \"\"" >> ~/add-client.sh'
 sh -c 'echo "ls files" >> ~/add-client.sh'
 sh -c 'echo "echo \"\"" >> ~/add-client.sh'
 sh -c 'echo "echo \"You may now transfer /home/"'$(whoami)'"/client-configs/files/\$1.ovpn to your client device.\"" >> ~/add-client.sh'
-
 chmod 700 ~/add-client.sh
 
 

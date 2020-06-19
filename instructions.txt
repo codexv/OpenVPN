@@ -164,7 +164,16 @@ Add these lines:
 COMMIT
 # END OPENVPN RULES
 
+#***************** Optional ******************#
+Add these after the "required" section:
+
+# Uncomment the line below to disable client to client communication
+-A ufw-before-forward -i tun0 -o tun0 -j DROP
+
+#*********************************************#
+
 -save and close-
+
 
 sudo nano /etc/default/ufw
 
@@ -393,3 +402,19 @@ To configure more clients, you only need to follow
 steps 4 and 9-11 for each additional device. 
 
 To revoke access to clients, just follow step 12.
+
+
+
+
+
+Additonal Notes:
+
+View logs:
+cat /var/log/openvpn/openvpn-status.log
+
+
+iptables -A FORWARD -i tun0 -o tun0 -j DROP     #to disable client-to-client communication
+sudo nano /etc/ufw/before.rules
+# Uncomment the line below to disable client to client communication
+-A ufw-before-forward -i tun0 -o tun0 -j DROP
+
