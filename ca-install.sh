@@ -52,10 +52,9 @@ sh -c 'echo "set_var EASYRSA_REQ_OU         \"'$OU'\"" >> ~/'$RSAFOLDER'/vars'
 
 ./easyrsa init-pki
 ./easyrsa build-ca nopass
-./easyrsa import-req /tmp/$CNSERVER.req $CNSERVER
+./easyrsa import-req ~/$CNSERVER.req $CNSERVER
 ./easyrsa sign-req server $CNSERVER
 
-cp /tmp/sign-cert.sh ~/sign-cert.sh
 chmod 700 ~/sign-cert.sh
 
 echo ""
