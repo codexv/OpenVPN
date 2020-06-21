@@ -63,3 +63,10 @@ echo ""
 echo "You may now proceed with the server-install.sh script."
 echo "Press [ENTER] on your Server Machine"
 echo ""
+
+# A couple of housekeeping commands
+mkdir OpenVPN
+mv ~/ca-install.sh ~/$CNSERVER.req OpenVPN/
+rm ~/$RSAFILE
+
+### EOF ###

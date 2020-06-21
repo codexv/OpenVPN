@@ -98,6 +98,7 @@ read -p "Please be patient. Press [ENTER] to Continue..."
 sudo openvpn --genkey --secret ta.key
 sudo cp ~/$RSAFOLDER/ta.key /etc/openvpn/
 sudo cp ~/$RSAFOLDER/pki/dh.pem /etc/openvpn/
+rm ~/sign-cert.sh ~/$RSAFILE
 
 #STEP4: Generate Key Directories
 mkdir -p ~/client-configs/keys
