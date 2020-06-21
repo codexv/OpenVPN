@@ -14,18 +14,18 @@ OU="Community"
 # Latest version of EasyRSA (.tgz)
 RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0.7.tgz"
 
-# Common Name of Server (Ex. server)
-# Must match the CNSERVER parameter found on server-install.sh
-CNSERVER="vpn-usa2"
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # #  END OF CONFIGURATION  # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-
 # SCRIPT START
 # WARNING: DO NOT EDIT ANYTHING BELOW UNLESS YOU KNOW WHAT YOU'RE DOING!
+
+# Common Name of Server (Ex. server)
+# This is automatically generated. Please do not edit!
+CNSERVER="vpn-usa2"
+
 
 RSAFILE=$(echo $RSAURL | awk -F/ '{ print $NF }')
 RSAFOLDER=${RSAFILE//.tgz/}

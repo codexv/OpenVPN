@@ -28,7 +28,7 @@ RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0
 
 #STEP1: Installing OpenVPN, EasyRSA, UFW, and dnsutils
 sudo apt update
-sudo apt install openvpn ufw dnsutils -yy
+sudo apt install openvpn ufw wget dnsutils -yy
 
 echo ""
 
@@ -64,6 +64,9 @@ sh -c 'echo "./easyrsa import-req /tmp/\$1.req \$1" >> ~/sign-cert.sh'
 sh -c 'echo "./easyrsa sign-req client \$1" >> ~/sign-cert.sh'
 sh -c 'echo "echo \"You may now press ENTER on the other machine.\"" >> ~/sign-cert.sh'
 chmod 700 ~/sign-cert.sh
+
+# Update Common name of Server for ca-install.sh
+sed -i "s/CNSERVER=\"vpn-usa2\"/CNSERVER=\"$CNSERVER\"/" ~/OpenVPN/ca-install.sh
 
 #STEP2: EasyRSA Variables & Building the CA
 #This is done inside the CA Machine
