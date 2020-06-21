@@ -31,6 +31,7 @@ nano ~/OpenVPN/ca-install.sh
 ```
 
 Edit the RSAURL field for both files if necessary.
+
 You may also edit the parameters for ca-install.sh to match your own information.
 
 #### 3. Run the installer script for your VPN Server:
