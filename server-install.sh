@@ -120,7 +120,7 @@ sudo sh -c 'echo "push \"redirect-gateway def1 bypass-dhcp\"" >> /etc/openvpn/se
 sudo sh -c 'echo "push \"dhcp-option DNS 208.67.222.222\"" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "push \"dhcp-option DNS 208.67.220.220\"" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "keepalive 10 120" >> /etc/openvpn/server.conf'
-sudo sh -c 'echo "tls-crypt ta.key # This file is secret" >> /etc/openvpn/server.conf'
+sudo sh -c 'echo "tls-auth ta.key 0 # This file is secret" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "cipher AES-256-CBC" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "auth SHA256" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "user nobody" >> /etc/openvpn/server.conf'
