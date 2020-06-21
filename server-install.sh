@@ -125,14 +125,22 @@ sudo sh -c 'echo "cipher AES-256-CBC" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "auth SHA256" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "user nobody" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "group nogroup" >> /etc/openvpn/server.conf'
-sudo sh -c 'echo "tcp-nodelay" >> /etc/openvpn/server.conf'
+if [ $PROTO = "udp" ]; then
+    sudo sh -c 'echo "#tcp-nodelay" >> /etc/openvpn/server.conf'
+else
+    sudo sh -c 'echo "tcp-nodelay" >> /etc/openvpn/server.conf'
+fi
 sudo sh -c 'echo "persist-key" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "persist-tun" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "status /var/log/openvpn/openvpn-status.log" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "verb 0" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "log /dev/null" >> /etc/openvpn/server.conf'
 sudo sh -c 'echo "status /dev/null" >> /etc/openvpn/server.conf'
-sudo sh -c 'echo "explicit-exit-notify 0" >> /etc/openvpn/server.conf'
+if [ $PROTO = "udp" ]; then
+    sudo sh -c 'echo "#explicit-exit-notify 0" >> /etc/openvpn/server.conf'
+else
+    sudo sh -c 'echo "explicit-exit-notify 0" >> /etc/openvpn/server.conf'
+fi
 
 #STEP6: Adjusting Server Network Configuration
 sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
