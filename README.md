@@ -14,31 +14,39 @@ Installation:
 
 1. Login to your VPS Server then run the following commands:
 
+```bash
 sudo apt update && sudo apt install git
 git clone https://github.com/codexv/OpenVPN.git ~/OpenVPN
+```
 
 2. Check server-install.sh and ca-install.sh if they have the updated URL to EasyRSA:
 
+```bash
 nano ~/OpenVPN/server-install.sh
 nano ~/OpenVPN/ca-install.sh
+```
 
-Edit the RSAURL field for both files if necessary.
-You may also edit the parameters for ca-install.sh to match your own information.
+    Edit the RSAURL field for both files if necessary.
+    You may also edit the parameters for ca-install.sh to match your own information.
 
 3. Run the installer script for your VPN Server:
 
+```bash
 ./OpenVPN/server-install.sh
+```
 
-Answer the prompts accordingly.
+    Answer the prompts accordingly.
 
 
 4. You will have to switch to your CA machine and vice versa when advised by the script.
 
 When asked to proceed with the CA machine script, just log in to your CA machine and run:
 
+```bash
 ./ca-install.sh
+```
 
-Answer the prompts accordingly.
+    Answer the prompts accordingly.
 
 
 
