@@ -16,6 +16,8 @@ Installation:
 
 ```bash
 sudo apt update && sudo apt install git
+```
+```bash
 git clone https://github.com/codexv/OpenVPN.git ~/OpenVPN
 ```
 
@@ -23,11 +25,13 @@ git clone https://github.com/codexv/OpenVPN.git ~/OpenVPN
 
 ```bash
 nano ~/OpenVPN/server-install.sh
+```
+```bash
 nano ~/OpenVPN/ca-install.sh
 ```
 
-    Edit the RSAURL field for both files if necessary.
-    You may also edit the parameters for ca-install.sh to match your own information.
+Edit the RSAURL field for both files if necessary.
+You may also edit the parameters for ca-install.sh to match your own information.
 
 3. Run the installer script for your VPN Server:
 
@@ -35,7 +39,7 @@ nano ~/OpenVPN/ca-install.sh
 ./OpenVPN/server-install.sh
 ```
 
-    Answer the prompts accordingly.
+Answer the prompts accordingly.
 
 
 4. You will have to switch to your CA machine and vice versa when advised by the script.
@@ -46,7 +50,7 @@ When asked to proceed with the CA machine script, just log in to your CA machine
 ./ca-install.sh
 ```
 
-    Answer the prompts accordingly.
+Answer the prompts accordingly.
 
 
 
