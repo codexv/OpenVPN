@@ -11,12 +11,6 @@
 # Latest version of EasyRSA (.tgz)
 RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0.7.tgz"
 
-#### The section below has been deprecated and replaced with user prompts ####
-#CNSERVER="vpn-usa2"         # Common Name of Server (Ex. server)
-#SERVERIP="10.10.10.11"      # IP Address of your VPN Server
-#CAUSER="acronix"            # Non-root user of the CA Machine
-#PORTN="1194"                # Port Number used by the VPN
-#PROTO="udp"                 # Choose either "tcp" or "udp"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # #  END OF CONFIGURATION  # # # # # # # # # # # # 
@@ -24,6 +18,13 @@ RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0
 
 
 # WARNING: PLEASE DO NOT EDIT ANYTHING BELOW UNLESS YOU KNOW WHAT YOU'RE DOING!
+
+#### The section below has been deprecated and replaced with user prompts ####
+#CNSERVER="vpn-usa2"         # Common Name of Server (Ex. server)
+#SERVERIP="10.10.10.11"      # IP Address of your VPN Server
+#CAUSER="acronix"            # Non-root user of the CA Machine
+#PORTN="1194"                # Port Number used by the VPN
+#PROTO="udp"                 # Choose either "tcp" or "udp"
 
 
 #STEP1: Installing OpenVPN, EasyRSA, UFW, and dnsutils
