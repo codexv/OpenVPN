@@ -22,10 +22,12 @@ RSAURL="https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.7/EasyRSA-3.0
 # SCRIPT START
 # WARNING: DO NOT EDIT ANYTHING BELOW UNLESS YOU KNOW WHAT YOU'RE DOING!
 
+sudo apt update
+sudo apt install wget -yy
+
 # Common Name of Server (Ex. server)
 # This is automatically generated. Please do not edit!
 CNSERVER="vpn-usa2"
-
 
 RSAFILE=$(echo $RSAURL | awk -F/ '{ print $NF }')
 RSAFOLDER=${RSAFILE//.tgz/}
