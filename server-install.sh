@@ -82,7 +82,7 @@ echo "You are now going to SCP (upload) files to your CA Machine."
 echo "You may be prompted to enter password for $CAUSER@$CAIPADD"
 scp ~/$RSAFOLDER/pki/reqs/$CNSERVER.req ~/sign-cert.sh ~/OpenVPN/ca-install.sh $CAUSER@$CAIPADD:/home/$CAUSER/
 echo ""
-echo "Login to CA Machine and run ./ca-install.sh or ./sign-cert $CNSERVER server (if adding a server)
+echo "Login to CA Machine and run ./ca-install.sh or ./sign-cert $CNSERVER server (if adding a server)"
 read -p "then press [ENTER] here when instructed..."
 echo ""
 echo "You are now going to SCP (download) files from your CA Machine."
