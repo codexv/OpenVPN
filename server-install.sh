@@ -61,8 +61,15 @@ tar xvf $RSAFILE
 #### Create ~/sign-cert.sh File (to be used by CA Machine) ####
 sh -c 'echo "#!/bin/bash" > ~/sign-cert.sh'
 sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/sign-cert.sh'
-sh -c 'echo "./easyrsa import-req /tmp/\$1.req \$1" >> ~/sign-cert.sh'
-sh -c 'echo "./easyrsa sign-req client \$1" >> ~/sign-cert.sh'
+sh -c 'echo "if [ \$2 = \"server\" ]; then" >> ~/sign-cert.sh'
+sh -c 'echo "    ./easyrsa import-req ~/\$1.req \$1" >> ~/sign-cert.sh'
+sh -c 'echo "    ./easyrsa sign-req server \$1" >> ~/sign-cert.sh'
+sh -c 'echo "    mv ~/\$1.req ~/OpenVPN" >> ~/sign-cert.sh'
+sh -c 'echo "    rm ~/ca-install.sh" >> ~/sign-cert.sh'
+sh -c 'echo "else" >> ~/sign-cert.sh'
+sh -c 'echo "    ./easyrsa import-req /tmp/\$1.req \$1" >> ~/sign-cert.sh'
+sh -c 'echo "    ./easyrsa sign-req client \$1" >> ~/sign-cert.sh'
+sh -c 'echo "fi" >> ~/sign-cert.sh'
 sh -c 'echo "echo \"You may now press ENTER on the other machine.\"" >> ~/sign-cert.sh'
 chmod 700 ~/sign-cert.sh
 
