@@ -80,14 +80,12 @@ sudo cp ~/$RSAFOLDER/pki/private/$CNSERVER.key /etc/openvpn/
 echo ""
 echo "You are now going to SCP (upload) files to your CA Machine."
 echo "You may be prompted to enter password for $CAUSER@$CAIPADD"
-read -p "Press [ENTER] to Continue..."
 scp ~/$RSAFOLDER/pki/reqs/$CNSERVER.req ~/sign-cert.sh ~/OpenVPN/ca-install.sh $CAUSER@$CAIPADD:/home/$CAUSER/
 echo ""
-read -p "Proceed with CA-Machine Script, then press ENTER here when instructed..."
+read -p "Login to CA Machine and run ./ca-install.sh, then press [ENTER] here when instructed..."
 echo ""
 echo "You are now going to SCP (download) files from your CA Machine."
 echo "You may be prompted to enter password for $CAUSER@$CAIPADD"
-read -p "Press [ENTER] to Continue..."
 scp -T $CAUSER@$CAIPADD:"/home/$CAUSER/$RSAFOLDER/pki/issued/$CNSERVER.crt /home/$CAUSER/$RSAFOLDER/pki/ca.crt" /tmp
 sudo cp /tmp/$CNSERVER.crt /etc/openvpn/
 sudo cp /tmp/ca.crt /etc/openvpn/
