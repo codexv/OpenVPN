@@ -37,7 +37,7 @@ You may also edit the parameters for ca-install.sh to match your own information
 #### 3. Run the installer script for your VPN Server:
 
 ```bash
-./OpenVPN/server-install.sh
+sh ~/OpenVPN/server-install.sh
 ```
 
 Answer the prompts accordingly.
@@ -48,7 +48,7 @@ Answer the prompts accordingly.
 When asked to proceed with the CA machine script, just log in to your CA machine and run:
 
 ```bash
-./ca-install.sh
+sh ~/ca-install.sh
 ```
 
 Answer the prompts accordingly.
