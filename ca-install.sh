@@ -65,8 +65,8 @@ echo "Press [ENTER] on your Server Machine"
 echo ""
 
 # A couple of housekeeping commands
-mkdir OpenVPN
-mv ~/ca-install.sh ~/$CNSERVER.req OpenVPN/
+mkdir ~/OpenVPN
+mv ~/ca-install.sh ~/$CNSERVER.req ~/OpenVPN/
 rm ~/$RSAFILE
 
 ### EOF ###
