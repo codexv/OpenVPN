@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script by Acronix (acronix@coders.ph)
+# Script by Joshua Abdullah, a.k.a. Acronix (acronix@coders.ph)
 # Always check latest version of EasyRSA
 
 # Set Parameters Accordingly
