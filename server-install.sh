@@ -58,7 +58,7 @@ wget -P ~/ $RSAURL
 cd ~
 tar xvf $RSAFILE
 
-#### Create ~/sign-cert.sh File (to be used by CA Machine) ####
+#### Create ~/sign-cert.sh file (to be used by CA Machine) ####
 sh -c 'echo "#!/bin/bash" > ~/sign-cert.sh'
 sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/sign-cert.sh'
 sh -c 'echo "if [[ \$2 = \"server\" ]]; then" >> ~/sign-cert.sh'
@@ -72,6 +72,32 @@ sh -c 'echo "    ./easyrsa sign-req client \$1" >> ~/sign-cert.sh'
 sh -c 'echo "fi" >> ~/sign-cert.sh'
 sh -c 'echo "echo \"You may now press ENTER on the other machine.\"" >> ~/sign-cert.sh'
 chmod 700 ~/sign-cert.sh
+
+#### Create ~/revoke-cert.sh file (to be transferred to CA Machine) ####
+sh -c 'echo "#!/bin/bash" > ~/revoke-cert.sh'
+sh -c 'echo "CAIP=\$(wget -qO- http://ipecho.net/plain | xargs echo)" >> ~/revoke-cert.sh'
+sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/revoke-cert.sh'
+sh -c 'echo "./easyrsa revoke \$1" >> ~/revoke-cert.sh'
+sh -c 'echo "./easyrsa gen-crl" >> ~/revoke-cert.sh'
+sh -c 'echo "echo \"You may now SCP your crl.pem to your VPN Server:\"" >> ~/revoke-cert.sh'
+sh -c 'echo "echo \"sudo scp \$(whoami)@\$CAIP:/home/\$(whoami)/"'$RSAFOLDER'"/pki/crl.pem /etc/openvpn/crl.pem\"" >> ~/revoke-cert.sh'
+chmod 700 ~/revoke-cert.sh
+
+#### Create ~/myip.sh utility to quickly check the Public IP of your Server/CA ####
+sh -c 'echo "#!/bin/bash" > ~/myip.sh'
+sh -c 'echo "IPADD=\$(wget -qO- http://ipecho.net/plain | xargs echo)" >> ~/myip.sh'
+sh -c 'echo "echo \"My IPv4 Address is: \$IPADD\"" >> ~/myip.sh'
+chmod 700 ~/myip.sh
+
+#### Create ~/update-ca-ip.sh to update ~/add-client.sh script with current CA IP Address ####
+sh -c 'echo "#!/bin/bash" > ~/update-ca-ip.sh'
+sh -c 'echo "CACURIP=\""'$CAIPADD'"\"" >> ~/update-ca-ip.sh'
+sh -c 'echo "read -p \"Enter New IP of CA ["'$CAIPADD'"]: \" NEWCAIP" >> ~/update-ca-ip.sh'
+sh -c 'echo ": \${NEWCAIP:="'$CAIPADD'"}" >> ~/update-ca-ip.sh'
+sh -c 'echo "sed -i \"s/\$CACURIP/\$NEWCAIP/\" ~/add-client.sh" >> ~/update-ca-ip.sh'
+sh -c 'echo "echo \"CA IP Address has been Successfully Updated to \$NEWCAIP\"" >> ~/update-ca-ip.sh'
+sh -c 'echo "sed -i \"s/\$CACURIP/\$NEWCAIP/\" ~/update-ca-ip.sh" >> ~/update-ca-ip.sh'
+chmod 700 ~/update-ca-ip.sh
 
 # Update Common name of Server for ca-install.sh
 sed -i "s/CNSERVER=\"vpn-usa2\"/CNSERVER=\"$CNSERVER\"/" ~/OpenVPN/ca-install.sh
@@ -87,7 +113,7 @@ sudo cp ~/$RSAFOLDER/pki/private/$CNSERVER.key /etc/openvpn/
 echo ""
 echo "You are now going to SCP (upload) files to your CA Machine."
 echo "You may be prompted to enter password for $CAUSER@$CAIPADD"
-scp ~/$RSAFOLDER/pki/reqs/$CNSERVER.req ~/sign-cert.sh ~/OpenVPN/ca-install.sh $CAUSER@$CAIPADD:/home/$CAUSER/
+scp ~/$RSAFOLDER/pki/reqs/$CNSERVER.req ~/sign-cert.sh ~/revoke-cert.sh ~/myip.sh ~/OpenVPN/ca-install.sh $CAUSER@$CAIPADD:/home/$CAUSER/
 echo ""
 echo "Login to CA Machine and run ./ca-install.sh or ./sign-cert $CNSERVER server (if adding a server)"
 read -p "then press [ENTER] here when instructed..."
@@ -105,7 +131,7 @@ read -p "Please be patient. Press [ENTER] to Continue..."
 sudo openvpn --genkey --secret ta.key
 sudo cp ~/$RSAFOLDER/ta.key /etc/openvpn/
 sudo cp ~/$RSAFOLDER/pki/dh.pem /etc/openvpn/
-rm ~/sign-cert.sh ~/$RSAFILE
+rm ~/sign-cert.sh ~/revoke-cert.sh ~/$RSAFILE
 
 #STEP4: Generate Key Directories
 mkdir -p ~/client-configs/keys
@@ -149,6 +175,8 @@ if [ $PROTO = "udp" ]; then
 else
     sudo sh -c 'echo "explicit-exit-notify 0" >> /etc/openvpn/server.conf'
 fi
+sudo sh -c 'echo "#crl-verify crl.pem" >> /etc/openvpn/server.conf'
+
 
 #STEP6: Adjusting Server Network Configuration
 sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
@@ -217,13 +245,18 @@ echo "add-client.sh can be found at your home directory."
 
 #### Create ~/add-client.sh File ####
 sh -c 'echo "#!/bin/bash" > ~/add-client.sh'
+sh -c 'echo "MYIP=\$(wget -qO- http://ipecho.net/plain | xargs echo)" >> ~/add-client.sh'
+sh -c 'echo "CACURIP=\""'$CAIPADD'"\"" >> ~/add-client.sh'
+sh -c 'echo "read -p \"Enter IP Address of CA ["'$CAIPADD'"]: \" NEWCAIP" >> ~/add-client.sh'
+sh -c 'echo ": \${NEWCAIP:="'$CAIPADD'"}" >> ~/add-client.sh'
+sh -c 'echo "sed -i \"s/\$CACURIP/\$NEWCAIP/\" ~/add-client.sh" >> ~/add-client.sh'
 sh -c 'echo "cd ~/"'$RSAFOLDER'"/" >> ~/add-client.sh'
 sh -c 'echo "./easyrsa gen-req \$1 nopass" >> ~/add-client.sh'
 sh -c 'echo "cp pki/private/\$1.key ~/client-configs/keys/" >> ~/add-client.sh'
-sh -c 'echo "scp pki/reqs/\$1.req "'$CAUSER'"@"'$CAIPADD'":/tmp" >> ~/add-client.sh'
+sh -c 'echo "scp pki/reqs/\$1.req "'$CAUSER'"@\$NEWCAIP:/tmp" >> ~/add-client.sh'
 sh -c 'echo "echo \"Switch to CA machine and run ./sign-cert.sh \$1\"" >> ~/add-client.sh'
 sh -c 'echo "read -p \"Press [ENTER] here when instructed...\"" >> ~/add-client.sh'
-sh -c 'echo "scp "'$CAUSER'"@"'$CAIPADD'":/home/"'$CAUSER'"/"'$RSAFOLDER'"/pki/issued/\$1.crt /tmp" >> ~/add-client.sh'
+sh -c 'echo "scp "'$CAUSER'"@\$NEWCAIP:/home/"'$CAUSER'"/"'$RSAFOLDER'"/pki/issued/\$1.crt /tmp" >> ~/add-client.sh'
 sh -c 'echo "cp /tmp/\$1.crt ~/client-configs/keys/" >> ~/add-client.sh'
 sh -c 'echo "cd ~/client-configs" >> ~/add-client.sh'
 sh -c 'echo "sudo ./make_config.sh \$1" >> ~/add-client.sh'
@@ -231,6 +264,7 @@ sh -c 'echo "echo \"\"" >> ~/add-client.sh'
 sh -c 'echo "ls files" >> ~/add-client.sh'
 sh -c 'echo "echo \"\"" >> ~/add-client.sh'
 sh -c 'echo "echo \"You may now transfer /home/"'$(whoami)'"/client-configs/files/\$1.ovpn to your client device.\"" >> ~/add-client.sh'
+sh -c 'echo "echo \"Example: scp '$(whoami)'@\$MYIP:/home/"'$(whoami)'"/client-configs/files/\$1.ovpn ~/Documents/\"" >> ~/add-client.sh'
 chmod 700 ~/add-client.sh
 
 
