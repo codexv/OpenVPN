@@ -89,16 +89,6 @@ sh -c 'echo "IPADD=\$(wget -qO- http://ipecho.net/plain | xargs echo)" >> ~/myip
 sh -c 'echo "echo \"My IPv4 Address is: \$IPADD\"" >> ~/myip.sh'
 chmod 700 ~/myip.sh
 
-#### Create ~/update-ca-ip.sh to update ~/add-client.sh script with current CA IP Address ####
-sh -c 'echo "#!/bin/bash" > ~/update-ca-ip.sh'
-sh -c 'echo "CACURIP=\""'$CAIPADD'"\"" >> ~/update-ca-ip.sh'
-sh -c 'echo "read -p \"Enter New IP of CA ["'$CAIPADD'"]: \" NEWCAIP" >> ~/update-ca-ip.sh'
-sh -c 'echo ": \${NEWCAIP:="'$CAIPADD'"}" >> ~/update-ca-ip.sh'
-sh -c 'echo "sed -i \"s/\$CACURIP/\$NEWCAIP/\" ~/add-client.sh" >> ~/update-ca-ip.sh'
-sh -c 'echo "echo \"CA IP Address has been Successfully Updated to \$NEWCAIP\"" >> ~/update-ca-ip.sh'
-sh -c 'echo "sed -i \"s/\$CACURIP/\$NEWCAIP/\" ~/update-ca-ip.sh" >> ~/update-ca-ip.sh'
-chmod 700 ~/update-ca-ip.sh
-
 # Update Common name of Server for ca-install.sh
 sed -i "s/CNSERVER=\"vpn-usa2\"/CNSERVER=\"$CNSERVER\"/" ~/OpenVPN/ca-install.sh
 
